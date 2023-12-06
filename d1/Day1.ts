@@ -1,26 +1,35 @@
-import * as fs from 'fs';
-
-const readFile = (filePath: string): Promise<string> => {
-
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, 'utf8', (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(data);
-            }
-        });
-    });
-}
-
-
+import readFile from '../utils/readFile';
 
 const filePath = './d1/input.txt';
 
-readFile(filePath)
-    .then((fileContents) => {
-        console.log('File contents: ', fileContents);
-    })
-    .catch((error) => {
-        console.error('Error reading file:', error);
+
+const getNumber = (row: string[]): string => {
+
+    for (const char of row)  {
+        if (!isNaN(Number(char))) {
+            return String(char);
+        }
+    };
+    return "0"; 
+}
+
+
+const main = async () => {
+
+    const fileContents = await readFile(filePath);
+
+    const lines: string[] = fileContents.split(/\r?\n/);
+
+    const listOfNumber: number[]= [];
+    lines.forEach((line, _) => {
+        const listed: string[] = line.split('');
+        const firstNum: string =getNumber(listed);
+        const lastNum: string = getNumber(listed.reverse());
+        listOfNumber.push(Number(firstNum + lastNum));
     });
+    console.log(listOfNumber.reduce((acc, num) => acc + num, 0));
+
+}
+
+
+main()
