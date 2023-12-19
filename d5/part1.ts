@@ -35,17 +35,49 @@ const getDataMap = (data: string): mapObject => {
     return dataMap;
 };
 
-const getPlace = (data: string) => { };
-const mapNextPlace = (source: number, target: number) => { };
+const getPlace = (seedMap: SeedSet, seed: number): number => {
+    const lowerRange: number = seedMap.source;
+    const upperRange: number = seedMap.source + seedMap.range;
+    const locationIndex: number = seed - seedMap.source;
+    if (seed >= lowerRange && seed <= upperRange) {
+        return seedMap.destination + locationIndex;
+    }
+    return seed;
 
-const countSeedMaps = (seeds: number[], seedMaps: mapObjectList): number => {
+};
 
-    for (let i = 0; i<seedMaps.length; i++) {
+const mapNewSeedLocation = (seedMaps: SeedSet[], seeds:number[]): number[] => {
+    const newLocations: number[] = [];
+
+    outerLoop: for (let x = 0; x < seeds.length; x++) {
+        const seed = seeds[x];
+        for (let i = 0; i < seedMaps.length; i++) {
+            const seedMap = seedMaps[i];
+            const seedPlace = getPlace(seedMap, seed);
+            if (seed != seedPlace) {
+                newLocations.push(seedPlace);
+                continue outerLoop;
+            }
+
+        }
+        newLocations.push(seed);
+    }
+    return newLocations;
+
+
+}
+const countSeedMaps = (seeds: number[], seedMaps: mapObject[]): number => {
+
+    for (let i = 0; i < seedMaps.length; i++) {
         const locations: number[] = [];
 
+        seeds = mapNewSeedLocation(
+            seedMaps[i], seeds);
 
     }
-    return 0
+    const lowestNumber: number = seeds.sort((a,b)=> a-b)[0];
+
+    return lowestNumber;
 }
 
 const main = async () => {
@@ -61,7 +93,7 @@ const main = async () => {
         mapObjectList.push(dataMap);
 
     })
-    
+
     const lowestSeed: number = countSeedMaps(seeds, mapObjectList);
 
     console.log(lowestSeed);
