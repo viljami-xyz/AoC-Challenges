@@ -1,5 +1,5 @@
 import readFile from '../utils/readFile';
-
+import * as fs from 'fs';
 
 interface SeedSet {
     destination: number,
@@ -46,38 +46,55 @@ const getPlace = (seedMap: SeedSet, seed: number): number => {
 
 };
 
-const mapNewSeedLocation = (seedMaps: SeedSet[], seeds:number[]): number[] => {
-    const newLocations: number[] = [];
+const mapNewSeedLocation = (seedMaps: SeedSet[], seed: number): number => {
 
-    outerLoop: for (let x = 0; x < seeds.length; x++) {
-        const seed = seeds[x];
-        for (let i = 0; i < seedMaps.length; i++) {
-            const seedMap = seedMaps[i];
-            const seedPlace = getPlace(seedMap, seed);
-            if (seed != seedPlace) {
-                newLocations.push(seedPlace);
-                continue outerLoop;
-            }
-
+    for (let i = 0; i < seedMaps.length; i++) {
+        const seedMap = seedMaps[i];
+        const seedPlace = getPlace(seedMap, seed);
+        if (seed != seedPlace) {
+            return seedPlace
         }
-        newLocations.push(seed);
+
     }
-    return newLocations;
+    return seed
 
 
 }
-const countSeedMaps = (seeds: number[], seedMaps: mapObject[]): number => {
+const countSeedMaps = (seed: number, seedMaps: mapObject[]): number => {
 
     for (let i = 0; i < seedMaps.length; i++) {
 
-        seeds = mapNewSeedLocation(
-            seedMaps[i], seeds);
+        seed = mapNewSeedLocation(
+            seedMaps[i], seed);
 
     }
-    const lowestNumber: number = seeds.sort((a,b)=> a-b)[0];
 
-    return lowestNumber;
+    return seed;
 }
+const getLargerSetOfSeeds = (seeds: number[], seedMaps: mapObject[]): number => {
+
+    let lowestSeed = 99999999999;
+    for (let i = 0; i < seeds.length; i += 2) {
+        console.log(i);
+        let start = seeds[i];
+        let end = seeds[i] + seeds[i + 1];
+        for (start; start < end; start++) {
+            const newSeed: number = countSeedMaps(start, seedMaps);
+            for (let y = 0; y < seeds.length; y += 2) {
+                let starty: number = seeds[y];
+                let endy: number = seeds[y] + seeds[y + 1];
+                if (starty >= newSeed
+                    && newSeed <= endy && newSeed < lowestSeed) {
+                    lowestSeed = newSeed;
+                }
+            }
+        }
+        console.log(lowestSeed);
+
+    }
+    return lowestSeed
+
+};
 
 const main = async () => {
     const fileContent: string = await readFile(inputFile);
@@ -92,10 +109,18 @@ const main = async () => {
         mapObjectList.push(dataMap);
 
     })
+    const newSeed: number = getLargerSetOfSeeds(seeds, mapObjectList);
 
-    const lowestSeed: number = countSeedMaps(seeds, mapObjectList);
+    console.log(newSeed);
+    fs.writeFile('./output.txt', String(newSeed), (err) => {
+        if (err) {
+            console.error("fuck", err);
+        } else {
+            console.log("writted");
+        }
+    });
 
-    console.log(lowestSeed);
+
 
 }
 main()
