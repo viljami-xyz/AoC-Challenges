@@ -1,5 +1,6 @@
 import { win32 } from "path";
 import readFile from "../utils/readFile";
+import { nextTick } from "process";
 
 type handWithBid = [number[], number][];
 
@@ -131,12 +132,43 @@ const getHandWithBid = (data: string[]): CardGame[] => {
 
 }
 
+const sortTwoHands = (handOne: CardGame, handTwo: CardGame): boolean => {
+    if (handOne.hand < handTwo.hand) {
+        return false;
+    }
+    if (handOne.hand > handTwo.hand) {
+        return true;
+    }
+    for (let i = 0; i < handOne.cards.length; i++) {
+        const hOneCard = handOne.cards[i];
+        const hTwoCard = handTwo.cards[i];
+        if (hOneCard > hTwoCard) {
+            return true;
+        }
+        if (hOneCard < hTwoCard) {
+            return false;
+        }
+    }
+    return false;
+
+}
+
+
 const main = async () => {
     const fileContent: string = await readFile('./d7/input.txt');
     const fileLines: string[] = fileContent.split(/\r?\n/);
     const cardGames: CardGame[] = getHandWithBid(fileLines);
-    console.log(cardGames);
 
+    let sortedCards: CardGame[] = cardGames.slice().sort((a,b) =>
+        sortTwoHands(a,b) ? 1 : -1);
+
+
+    const winnings: number[] = [];
+    for (let i=0;i<sortedCards.length;i++) {
+        let w: number = i+1;
+        winnings.push(sortedCards[i].bid*w);
+    }
+    console.log(winnings.reduce((a,b) => a+b));
 
 }
 
