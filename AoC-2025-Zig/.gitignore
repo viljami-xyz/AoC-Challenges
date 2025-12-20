@@ -1,0 +1,4 @@
+# Zig ignores
+.zig-cache/
+zig-out/
+src/puzzle-inputs/
